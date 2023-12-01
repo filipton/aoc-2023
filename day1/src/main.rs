@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 fn main() {
+    part1();
     part2();
 }
 
@@ -47,25 +48,24 @@ fn part2() {
 
         for digit in digits_map.iter() {
             let first_index = first_index(&tmp_line, digit.0).map(|i| i as i32);
-            let last_index = last_index(&tmp_line, digit.0).map(|i| i as i32);
-
             if first_index.is_some() && first_index.unwrap() < first.0 {
                 first = (first_index.unwrap(), digit.0, digit.1.clone());
-            }
-
-            if last_index.is_some() && last_index.unwrap() > last.0 {
-                last = (last_index.unwrap(), digit.0, digit.1.clone());
             }
         }
 
         if !first.1.is_empty() {
-            tmp_line = tmp_line.replace(first.1, &first.2.to_string());
-        }
-        if !last.1.is_empty() {
-            tmp_line = tmp_line.replace(last.1, &last.2.to_string());
+            tmp_line.insert_str(first.0 as usize, &first.2.to_string());
         }
 
-        println!("{} -> {}", line, tmp_line);
+        for digit in digits_map.iter() {
+            let last_index = last_index(&tmp_line, digit.0).map(|i| i as i32);
+            if last_index.is_some() && last_index.unwrap() > last.0 {
+                last = (last_index.unwrap(), digit.0, digit.1.clone());
+            }
+        }
+        if !last.1.is_empty() {
+            tmp_line.insert_str(last.0 as usize, &last.2.to_string());
+        }
 
         let digits = tmp_line
             .chars()
