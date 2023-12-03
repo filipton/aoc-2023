@@ -1,10 +1,6 @@
 use std::collections::HashMap;
 
 fn main() {
-    part1();
-}
-
-fn part1() {
     let input = include_str!("input.txt");
     let mut max_map: HashMap<&str, i32> = HashMap::new();
     max_map.insert("red", 12);
