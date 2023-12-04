@@ -81,4 +81,3 @@ fn inner_find_number(input: &Vec<Vec<char>>, x: usize, y: usize) -> u32 {
 
     return num;
 }
-
