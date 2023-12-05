@@ -1,8 +1,4 @@
 fn main() {
-    part1();
-}
-
-fn part1() {
     let input = include_str!("input.txt");
     let cards = input
         .lines()
