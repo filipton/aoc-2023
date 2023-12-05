@@ -1,9 +1,11 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct MapRange {
     dst: usize,
     src: usize,
+    len: usize,
 
     src_range: std::ops::Range<usize>,
+    dst_range: std::ops::Range<usize>,
 }
 
 fn main() {
@@ -43,7 +45,9 @@ fn main() {
         map.last_mut().unwrap().push(MapRange {
             dst: parts[0],
             src: parts[1],
+            len: parts[2],
             src_range: parts[1]..parts[1] + parts[2],
+            dst_range: parts[0]..parts[0] + parts[2],
         });
     }
 
@@ -58,30 +62,28 @@ fn main() {
             }
         }
 
-        println!("Seed {} -> {}", seed, curr);
         output_p1.push(curr);
     }
-    println!("Part 1: {:?}", output_p1.iter().min());
+    println!("Part 1: {:?}", output_p1.iter().min().unwrap());
 
-    // TODO: optimize this shit lmaoo
-    let mut min = usize::MAX;
-    for seed_range in seeds_p2 {
-        for seed in seed_range.clone() {
-            let mut curr = seed;
+    let mut last_map = map.last().unwrap().to_vec();
+    last_map.sort_by(|a, b| a.dst.cmp(&b.dst));
 
-            for m in &map {
-                let map_obj = m.iter().find(|x| x.src_range.contains(&curr));
+    for o in last_map {
+        for dst_seed in o.dst..o.dst + o.len {
+            let mut curr = dst_seed;
+
+            for m in map.iter().skip(1).rev() {
+                let map_obj = m.iter().find(|x| x.dst_range.contains(&curr));
                 if let Some(map_obj) = map_obj {
-                    curr = map_obj.dst + (curr - map_obj.src);
+                    curr = map_obj.src + (curr - map_obj.dst);
                 }
             }
 
-            if curr < min {
-                min = curr;
+            if seeds_p2.iter().any(|x| x.contains(&curr)) {
+                println!("Part 2: {}", dst_seed);
+                return;
             }
         }
-
-        println!("Seed range {:?} -> {}", seed_range, min);
     }
-    println!("Part 2: {:?}", min);
 }
