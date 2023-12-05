@@ -70,10 +70,10 @@ fn main() {
     last_map.sort_by(|a, b| a.dst.cmp(&b.dst));
 
     for o in last_map {
-        for dst_seed in o.dst..o.dst + o.len {
-            let mut curr = dst_seed;
+        for dst_location in o.dst..o.dst + o.len {
+            let mut curr = dst_location;
 
-            for m in map.iter().skip(1).rev() {
+            for m in map.iter().rev() {
                 let map_obj = m.iter().find(|x| x.dst_range.contains(&curr));
                 if let Some(map_obj) = map_obj {
                     curr = map_obj.src + (curr - map_obj.dst);
@@ -81,7 +81,7 @@ fn main() {
             }
 
             if seeds_p2.iter().any(|x| x.contains(&curr)) {
-                println!("Part 2: {}", dst_seed);
+                println!("Part 2: {}", dst_location);
                 return;
             }
         }
