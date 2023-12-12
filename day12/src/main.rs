@@ -10,65 +10,75 @@ fn main() {
             .map(|x| x.parse::<usize>().unwrap())
             .collect::<Vec<usize>>();
 
-        let question_marks = parts[0].matches("?").count();
-        let combinations = get_combinations(question_marks)
-            .iter()
-            .map(|x| {
-                x.iter()
-                    .map(|y| if *y == 0 { '.' } else { '#' })
-                    .collect::<Vec<char>>()
-            })
-            .collect::<Vec<Vec<char>>>();
+        let chars = parts[0].chars().collect::<Vec<char>>();
+        let arrg = get_arragements(0, &chars, 0, 0, &template);
+        arragements += arrg;
 
-        for c in combinations {
-            let mut ci = 0;
-            let mut hash_count = 0;
-            let mut c_template: Vec<usize> = vec![];
-
-            for i in 0..parts[0].len() {
-                let curr = match parts[0].chars().nth(i).unwrap() {
-                    '?' => {
-                        ci += 1;
-                        c[ci - 1]
-                    }
-                    '.' => '.',
-                    '#' => '#',
-                    _ => panic!("Unknown char"),
-                };
-
-                if curr == '#' {
-                    hash_count += 1;
-                } else if curr == '.' {
-                    if hash_count > 0 {
-                        c_template.push(hash_count);
-                        hash_count = 0;
-                    }
-                }
-            }
-
-            if hash_count > 0 {
-                c_template.push(hash_count);
-            }
-
-            if c_template == template {
-                arragements += 1;
-            }
-        }
+        println!("{}", arrg);
     }
 
-    println!("Arragements: {}", arragements);
+    println!("Part 1: {}", arragements);
 }
 
-// get_combinations should return vector of vector of usize's, so for n = 2 it should return [[0,0], [0,1], [1,0], [1,1]]
-// its 2^n combinations
-fn get_combinations(n: usize) -> Vec<Vec<usize>> {
-    let mut combinations = Vec::new();
-    for i in 0..2usize.pow(n as u32) {
-        let mut combination = Vec::new();
-        for j in 0..n {
-            combination.push((i >> j) & 1);
+fn get_arragements(
+    mut idx: usize,
+    chars: &Vec<char>,
+    mut hash_count: usize,
+    mut template_idx: usize,
+    template: &Vec<usize>,
+) -> usize {
+    let mut tmp_count = 0;
+
+    while idx < chars.len() {
+        if template_idx >= template.len() {
+            break;
         }
-        combinations.push(combination);
+
+        match chars[idx] {
+            '.' => {
+                if hash_count > 0 {
+                    if hash_count != template[template_idx] {
+                        return tmp_count;
+                    }
+
+                    template_idx += 1;
+                    hash_count = 0;
+                }
+            }
+            '#' => {
+                hash_count += 1;
+                if hash_count > template[template_idx] {
+                    return tmp_count;
+                }
+            }
+            '?' => {
+                // #
+                if hash_count + 1 <= template[template_idx] {
+                    tmp_count +=
+                        get_arragements(idx + 1, chars, hash_count + 1, template_idx, template);
+                }
+
+                // .
+                if hash_count == 0 {
+                    tmp_count += get_arragements(idx + 1, chars, 0, template_idx, template);
+                } else if hash_count == template[template_idx] {
+                    tmp_count += get_arragements(idx + 1, chars, 0, template_idx + 1, template);
+                }
+
+                break;
+            }
+            _ => unreachable!(),
+        }
+
+        idx += 1;
     }
-    combinations
+
+    // END OF RECURSION TREE
+    if (template_idx == template.len() - 1 && hash_count == template[template_idx])
+        || (template_idx == template.len() && hash_count == 0)
+    {
+        return 1;
+    }
+
+    tmp_count
 }
